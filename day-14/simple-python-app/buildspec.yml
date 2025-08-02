@@ -14,25 +14,22 @@ phases:
   pre_build:
     commands:
       - echo "Installing dependencies..."
-      - pip install -r day-14/simple-python-app/requirements.txt
+      - pip install -r requirements.txt
 
   build:
     commands:
       - echo "Running tests..."
-      - cd day-14/simple-python-app/
       - echo "Building Docker image..."
       - echo "$DOCKER_REGISTRY_PASSWORD" | docker login -u "$DOCKER_REGISTRY_USERNAME" --password-stdin "$DOCKER_REGISTRY_URL"
       - docker build -t "$DOCKER_REGISTRY_URL/$DOCKER_REGISTRY_USERNAME/simple-python-flask-app:latest" .
       - docker push "$DOCKER_REGISTRY_URL/$DOCKER_REGISTRY_USERNAME/simple-python-flask-app:latest"
-      - cd ../../  # Go back to root for packaging
-
-  post_build:
-    commands:
-      - echo "Build completed successfully!"
+      # ✅ Prepare artifact output
+      - mkdir -p ../../deployment
+      - cp -r ../../scripts ../../deployment/
+      - cp ../../appspec.yml ../../deployment/
+      - cp -r . ../../deployment/day-14/simple-python-app/
 
 artifacts:
   files:
-    - day-14/simple-python-app/**/*
-    - scripts/*.sh
-    - appspec.yml
-  base-directory: ./
+    - '**/*'
+  base-directory: ../../deployment
